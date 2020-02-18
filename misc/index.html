@@ -26,6 +26,11 @@ license that can be found in the LICENSE file.
             text-align: center;
             background-color: white;
         }
+
+        .loading {
+            background: #00000040 url(loader.gif) no-repeat center 50%;
+            z-index: 9999;
+        }
     </style>
     <!--
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -35,6 +40,16 @@ license that can be found in the LICENSE file.
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"
             crossorigin="anonymous"></script>
     <script src="decimal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="bootstrap-4.4.1-dist/js/bootstrap.js"></script>
+    <!--
+Add the following polyfill for Microsoft Edge 17/18 support:
+<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+(see https://caniuse.com/#feat=textencoder)
+-->
+    <script src="wasm_exec.js"></script>
 </head>
 
 <body class="bg-light">
@@ -53,7 +68,37 @@ license that can be found in the LICENSE file.
     //
     // asyncRun('这是异步的测试', 2000);
 </script>
+<!--
+<div class="modal fade" id="loadingModal">
+    <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+        <div class="progress progress-striped active" style="margin-bottom: 0;">
+            <div class="progress-bar" style="width: 100%;"></div>
+        </div>
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</div>
+-->
 
+<!-- Modal -->
+<div class="modal fade" id="modal1" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">请耐心等候</h5>
+            </div>
+            <div class="modal-body">
+                wasm资源载入中，根据带宽不同，载入时间有所延长。
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
         <img class="mr-3" src="http://browser.bolaxy.cn/favicon.png" alt="" width="48" height="48">
@@ -197,16 +242,34 @@ license that can be found in the LICENSE file.
     </div>
 </footer>
 -->
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="bootstrap-4.4.1-dist/js/bootstrap.js"></script>
 <script>
     let nonce = 0;
     let unit = new Decimal(10).pow(18);
 
     $(document).ready(() => {
+        $('#modal1').modal({backdrop: 'static', show: true});
+        if (!WebAssembly.instantiateStreaming) { // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
+        const go = new Go();
+        let mod, inst;
+        WebAssembly.instantiateStreaming(fetch("test.wasm"), go.importObject).then(async (result) => {
+            // console.clear();
+            mod = result.module;
+            inst = result.instance;
+
+            $('#modal1').hide();
+            $('.modal-backdrop').hide();
+            await go.run(inst);
+            inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
+        }).catch((err) => {
+            console.error(err);
+        });
+
         function insertKeyElement(el, index, address, hexkey) {
             el.append('<div class="media text-muted">\n' +
                 '                            <div id="key-'+ index +'" class="media-body border-bottom border-gray mb-2">\n' +
@@ -270,6 +333,7 @@ license that can be found in the LICENSE file.
 
         function toSend(address) {
             let host = getHost();
+            // console.log('fire');
             fetch(host + 'account/' + address)
                 .then((response) => {
                     return response.json();
@@ -605,33 +669,6 @@ license that can be found in the LICENSE file.
             }, 2000);
             // {"Data":null,"Err":"Key not found"}
         }
-    });
-</script>
-<!--
-Add the following polyfill for Microsoft Edge 17/18 support:
-<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
-(see https://caniuse.com/#feat=textencoder)
--->
-<script src="wasm_exec.js"></script>
-<script>
-    if (!WebAssembly.instantiateStreaming) { // polyfill
-        WebAssembly.instantiateStreaming = async (resp, importObject) => {
-            const source = await (await resp).arrayBuffer();
-            return await WebAssembly.instantiate(source, importObject);
-        };
-    }
-
-    const go = new Go();
-    let mod, inst;
-    WebAssembly.instantiateStreaming(fetch("test.wasm"), go.importObject).then(async (result) => {
-        // console.clear();
-        mod = result.module;
-        inst = result.instance;
-
-        await go.run(inst);
-        inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
-    }).catch((err) => {
-        console.error(err);
     });
 </script>
 </body>
