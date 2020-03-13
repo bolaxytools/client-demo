@@ -98,7 +98,7 @@ const download = async function () {
   //   fetchOptions.headers = headers
   // }
 
-  const downloadUrl = 'http://localhost:8879/js/bolaxy.wasm'
+  const downloadUrl = '/js/bolaxy.wasm'
   let response
   try {
     response = await fetch(downloadUrl, fetchOptions)
