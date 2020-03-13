@@ -8,10 +8,12 @@ Features:
 
 ```bash
 git clone https://github.com/bolaxytools/client-demo
-make compile-linux
-make build-linux
+npm install
+make build
+npm run build
+make run
 ```
 
 ## Prerequest
 
-Only supported Chrome 75+
+supported Chrome 50+
