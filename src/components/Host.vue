@@ -2,7 +2,7 @@
   <div class="card-deck mb-4">
     <div class="card shadow-sm">
       <div class="card-header">
-        <h5>节点服务地址</h5>
+        节点服务地址
       </div>
       <div class="card-body">
         <div class="form-group">
@@ -12,7 +12,7 @@
             :placeholder="placeholder"
           ></b-form-input>
           <small class="form-text text-muted pt-1">
-            <span class="badge badge-warning mr-2">警告</span>使用前请修改为你的节点服务地址
+            <span class="badge badge-warning mr-2">注意</span>使用前请修改为你的节点服务地址
           </small>
         </div>
       </div>

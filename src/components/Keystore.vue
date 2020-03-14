@@ -4,14 +4,7 @@
       <div class="card shadow-sm">
         <div class="card-header">
           <div class="d-flex justify-content-between align-items-baseline w-100">
-            <h5 class="font-weight-normal">导入Keystore</h5>
-            <b-button
-              variant="success"
-              :disabled="isDisabled"
-              @click="newKey"
-            >
-              新建
-            </b-button>
+            导入Keystore
           </div>
 
         </div>
@@ -40,10 +33,24 @@
             />
           </div>
           <b-button
+            v-b-tooltip.hover
+            title="从加密的Keystore格式字符串导入"
             variant="primary"
             :disabled="isDisabled"
             @click="importKey"
-          >导入
+            v-html="impBtnHtml"
+          >
+          </b-button>
+          <b-button
+            v-b-tooltip.hover
+            title="点击即可创建新密钥"
+            variant="success"
+            :disabled="isDisabled"
+            class="ml-3"
+            @click="newKey"
+            v-html="newBtnHtml"
+          >
+            新建
           </b-button>
         </div>
       </div>
@@ -53,11 +60,16 @@
 
 <script>
 import { mapGetters } from 'vuex'
+const impBtnBefore = '导入'
+const newBtnBefore = '新建'
+const btnProcess = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>导入中...'
 export default {
   data: function () {
     return {
       encryptedJson: '',
-      password: ''
+      password: '',
+      impBtnHtml: impBtnBefore,
+      newBtnHtml: newBtnBefore
     }
   },
   computed: {
@@ -65,38 +77,32 @@ export default {
   },
   methods: {
     newKey () {
+      this.newBtnHtml = btnProcess
       const generateKey = window.generateKey
       new Promise((resolve, reject) => {
-        generateKey((err, data) => {
-          if (err) {
-            reject(err)
-            return
-          }
-
-          resolve(data)
-        })
+        generateKey((err, data) => err ? reject(err) : resolve(data))
       }).then(async (data) => {
         await this.$store.dispatch('data/addKeyAsync', data)
+        this.$parent.$parent.makeToast({ title: '私钥新建成功', body: `账户地址：${data.address}`, variant: 'success' })
       }).catch(e => {
-        console.log(e)
+        this.$parent.$parent.makeToast({ title: '新建私钥出错', body: e, variant: 'warning' })
+      }).finally(() => {
+        this.newBtnHtml = newBtnBefore
       })
     },
     importKey () {
+      this.impBtnHtml = btnProcess
+      // importKeyStore 由wasm提供注册的全局函数
       const importKeyStore = window.importKeyStore
       new Promise((resolve, reject) => {
-        // importKeyStore 由wasm提供注册的全局函数
-        importKeyStore(this.encryptedJson, this.password, (err, data) => {
-          if (err) {
-            reject(err)
-            return
-          }
-
-          resolve(data)
-        })
+        importKeyStore(this.encryptedJson, this.password,
+          (err, data) => err ? reject(err) : resolve(data))
       }).then(async (data) => {
         await this.$store.dispatch('data/addKeyAsync', data)
       }).catch(e => {
-        console.log(e)
+        this.$parent.$parent.makeToast({ title: '导入Keystore出错', body: e, variant: 'warning' })
+      }).finally(() => {
+        this.impBtnHtml = impBtnBefore
       })
     }
   }

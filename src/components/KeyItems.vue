@@ -1,49 +1,39 @@
 <template>
   <div class="col-md-6">
-    <div class="card-deck">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5 class="font-weight-normal">账户列表</h5>
-        </div>
-        <div
-          id="key-list"
-          class="card-body"
+    <b-card
+      no-body
+      header="账户列表"
+      class="shadow-sm"
+    >
+      <b-list-group flush>
+        <b-list-group-item
+          class="d-flex justify-content-between align-items-center"
+          v-for="key in keys"
+          :key="key.index"
+          href="javascript:void(0)"
         >
-          <!-- 重复单元 -->
-          <b-list-group>
-            <b-list-group-item
-              class="d-flex justify-content-between align-items-center"
-              v-for="key in keys"
-              :key="key.index"
-            >
-              <p class="address">{{ key.address }}</p>
-              <b-dropdown
-                size="sm"
-                text="操作"
-                dropleft
-              >
-                <b-dropdown-item @click="toSend(key)">交易</b-dropdown-item>
-                <b-dropdown-item @click="copyToClipboard(key)">发送给</b-dropdown-item>
-                <b-dropdown-item @click="removeKey(key)">删除</b-dropdown-item>
-              </b-dropdown>
-            </b-list-group-item>
-          </b-list-group>
-        </div>
-      </div>
-    </div>
+          <p
+            class="address"
+            v-b-tooltip.hover
+            :title="key.address"
+          >{{ key.address }}</p>
+          <b-dropdown
+            size="sm"
+            text="操作"
+            dropleft
+          >
+            <b-dropdown-item @click="toSend(key)">交易</b-dropdown-item>
+            <b-dropdown-item @click="copyToClipboard(key)">发送给</b-dropdown-item>
+            <b-dropdown-item @click="removeKey(key)">删除</b-dropdown-item>
+          </b-dropdown>
+        </b-list-group-item>
+      </b-list-group>
+    </b-card>
   </div>
 </template>
 
 <style scoped>
-.address {
-  margin-bottom: 0;
-  max-width: 80%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -o-text-overflow: ellipsis;
-  -ms-text-overflow: ellipsis;
-}
+@import '../assets/styles/global.css';
 </style>
 
 <script>
@@ -53,9 +43,23 @@ import { Decimal } from 'decimal.js'
 const unit = new Decimal(10).pow(18)
 
 const fetchAccount = async function (host, address) {
-  let response
+  const FETCH_TIMEOUT = 5000
   try {
-    response = await fetch(host + 'account/' + address, { Origin: 'http://localhost:8080/' })
+    const response = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        // eslint-disable-next-line prefer-promise-reject-errors
+        reject('Request timed out')
+      }, FETCH_TIMEOUT)
+
+      fetch(host + 'account/' + address)
+        .then((response) => {
+          clearTimeout(timeout)
+          resolve(response)
+        })
+        // eslint-disable-next-line prefer-promise-reject-errors
+        .catch((err) => { reject(err) })
+    })
+
     const result = await response.json()
     if (result.Err !== '') {
       return { err: result.Err }
@@ -86,14 +90,15 @@ export default {
           hexkey: account.hexkey
         })
       } else {
-        console.log('获取账户信息出错', result.err)
+        this.$parent.$parent.makeToast({ title: '获取账户信息出错', body: `${result.err} 请检查你的节点服务地址是否正确`, variant: 'danger' })
       }
     },
     copyToClipboard (account) {
       this.$emit('selected', account.address)
     },
-    removeKey (account) {
-      this.$store.dispatch('data/removeKeyAsync', account.address)
+    async removeKey (account) {
+      await this.$store.dispatch('data/removeKeyAsync', account.address)
+      this.$parent.$parent.makeToast({ title: '账户已删除', body: account.address, variant: 'info' })
     }
   }
 }

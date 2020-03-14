@@ -1,23 +1,29 @@
 <template>
   <div
     id="app"
-    class="container-fluid"
+    class="container"
   >
 
     <Head />
     <Host :host="host" />
-    <Key @notifyParent="toTx"/>
-    <Transaction :target="sendTo"/>
+    <Key @notifyParent="toTx" />
+    <Transaction :target="sendTo" />
     <LatestRecords />
 
-    <div class="app-mask" :style="{display: progress.display}">
+    <div
+      class="app-mask"
+      :style="{display: progress.display}"
+    >
       <div class="container h-100">
         <div class="row h-100 justify-content-center align-items-center">
           <div class="card w-50">
             <div class="card-header">下载WASM</div>
             <div class="card-body">
               <p class="card-text">{{ progress.label }}</p>
-              <b-progress :max="progress.max" animated>
+              <b-progress
+                :max="progress.max"
+                animated
+              >
                 <b-progress-bar
                   :value="progress.value"
                   :label="`${((progress.value / progress.max) * 100).toFixed(1)}%`"
@@ -28,7 +34,10 @@
         </div>
       </div>
     </div>
-    <div class="app-mask--backdrop" :style="{display: progress.display}"></div>
+    <div
+      class="app-mask--backdrop"
+      :style="{display: progress.display}"
+    ></div>
   </div>
 </template>
 
@@ -158,6 +167,15 @@ const methods = {
   download,
   toTx (address) {
     this.sendTo = address
+  },
+  makeToast (options) {
+    this.$bvToast.toast(options.body, {
+      title: options.title,
+      variant: options.variant,
+      solid: true,
+      autoHideDelay: 4500,
+      append: true
+    })
   }
 }
 

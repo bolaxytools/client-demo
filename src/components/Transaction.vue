@@ -2,7 +2,7 @@
   <div class="card-deck mt-4 mb-3">
     <div class="card shadow-sm">
       <div class="card-header">
-        <h5 class="">发送BUSD</h5>
+        发送BUSD
       </div>
       <div class="card-body">
         <div class="row">
@@ -22,7 +22,7 @@
               />
               <small class="form-text text-muted">tips: 1=10**18</small>
             </div>
-            <b-button @click="transfer">发送</b-button>
+            <b-button @click="transfer" :disabled="disabled">发送</b-button>
           </div>
           <div class="col-6">
             <div class="form-group">
@@ -53,7 +53,8 @@ const unit = new Decimal(10).pow(18)
 export default {
   data: function () {
     return {
-      value: 0.0
+      value: 0.0,
+      disabled: false
     }
   },
   props: {
@@ -64,11 +65,12 @@ export default {
   },
   methods: {
     async transfer () {
+      this.disabled = true
       const signTx = window.signTx
       let amount = new Decimal(this.value)
       amount = amount.mul(unit)
-      console.log('tx-> to:', this.target, 'value:', this.value,
-        'amount:', amount.toString(), 'from:', this.from, 'balance:', this.balance)
+      // console.log('tx-> to:', this.target, 'value:', this.value,
+      // 'amount:', amount.toString(), 'from:', this.from, 'balance:', this.balance)
       try {
         const signedTx = await new Promise((resolve, reject) => {
           signTx({
@@ -76,13 +78,7 @@ export default {
             value: amount.toString(),
             hexkey: this.hexkey,
             nonce: this.nonce
-          }, (err, data) => {
-            if (err) {
-              reject(err)
-              return
-            }
-            resolve(data)
-          })
+          }, (err, data) => err ? reject(err) : resolve(data))
         })
 
         const host = this.$store.state.data.host
@@ -94,35 +90,39 @@ export default {
         const result = await response.json()
 
         const txhash = result.Data.txHash
+        this.$parent.makeToast({ title: '交易发送成功', body: `交易hash: ${txhash}`, variant: 'info' })
+        this.disabled = false
 
         // console.log('after transfer ...', txhash);
         let counter = 0
         const inter = setInterval(() => {
           fetch(host + 'tx/' + txhash)
             .then((resp) => resp.json())
-            .then((ret) => {
+            .then(async (ret) => {
               if (ret.Data !== null) {
                 clearInterval(inter)
                 // console.log('query txhash -> ', result.Data);
                 const status = ret.Data.status
                 const tx = { txhash: txhash, to: this.target, value: this.value, status: status }
-                this.$store.dispatch('data/addTxAsync', tx)
+                await this.$store.dispatch('data/addTxAsync', tx)
+                this.$parent.makeToast({ title: '交易已被确认', body: `交易hash: ${txhash}`, variant: 'success' })
                 return
               }
 
               counter += 1
               if (counter > 17) {
                 clearInterval(inter)
+                this.$parent.makeToast({ title: '交易确认超时', body: `交易hash: ${txhash}`, variant: 'warning' })
               }
             })
             .catch(e => {
               clearInterval(inter)
-              console.log('fetch txhash info failed.', e)
+              this.$parent.makeToast({ title: '查询超时', body: `fetch txhash info failed: ${e}`, variant: 'danger' })
             })
         }, 2000)
         // {"Data":null,"Err":"Key not found"}
       } catch (e) {
-        console.log('transfer failed.', e)
+        this.$parent.makeToast({ title: '交易失败', body: `transfer failed: ${e}`, variant: 'danger' })
       }
     }
   },
