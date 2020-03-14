@@ -2,7 +2,7 @@
   <div class="col-md-6">
     <b-card
       no-body
-      header="账户列表"
+      :header="$t('accountTitle')"
       class="shadow-sm"
     >
       <b-list-group flush>
@@ -19,12 +19,12 @@
           >{{ key.address }}</p>
           <b-dropdown
             size="sm"
-            text="操作"
+            :text="$t('accountOpt')"
             dropleft
           >
-            <b-dropdown-item @click="toSend(key)">交易</b-dropdown-item>
-            <b-dropdown-item @click="copyToClipboard(key)">发送给</b-dropdown-item>
-            <b-dropdown-item @click="removeKey(key)">删除</b-dropdown-item>
+            <b-dropdown-item @click="toSend(key)">{{ $t('optSend')}}</b-dropdown-item>
+            <b-dropdown-item @click="copyToClipboard(key)">{{ $t('optSendTo')}}</b-dropdown-item>
+            <b-dropdown-item @click="removeKey(key)">{{ $t('optRemove')}}</b-dropdown-item>
           </b-dropdown>
         </b-list-group-item>
       </b-list-group>

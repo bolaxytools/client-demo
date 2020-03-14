@@ -1,0 +1,22 @@
+{
+  "versionTitle": "Bolaxy 客户端真实演示",
+  "hostTitle": "节点服务地址",
+  "keyStoreTitle": "导入Keystore",
+  "accountTitle": "账户列表",
+  "transferTitle": "发送BUSD",
+  "recordTitle": "最近20条记录",
+  "hostNotice": "使用前请修改为你的节点服务地址",
+  "hostTip": "注意",
+  "importButton": "导入",
+  "newButton": "新建",
+  "accountOpt": "操作",
+  "optSend": "发交易",
+  "optSendTo": "发送给",
+  "optRemove": "删除",
+  "inputFrom": "发送账户",
+  "inputTo": "发送给",
+  "inputBalance": "BUSD余额",
+  "inputValue": "发送数额",
+  "keyStoreText": "Keystore 文本",
+  "keyStorePass": "Keystore 解密密码"
+}

@@ -4,7 +4,7 @@
       <div class="card shadow-sm">
         <div class="card-header">
           <div class="d-flex justify-content-between align-items-baseline w-100">
-            导入Keystore
+            {{ $t('keyStoreTitle') }}
           </div>
 
         </div>
@@ -14,7 +14,7 @@
           <input class="form-control"/>
         </div> -->
           <div class="form-group">
-            <label for="keystore-liternal">Keystore 文本</label>
+            <label for="keystore-liternal">{{ $t('keyStoreText') }}</label>
             <textarea
               id="keystore-liternal"
               name="keystore-literal"
@@ -23,7 +23,7 @@
             ></textarea>
           </div>
           <div class="form-group">
-            <label for="keystore-password">Keystore 解密密码</label>
+            <label for="keystore-password">{{ $t('keyStorePass') }}</label>
             <input
               id="keystore-password"
               name="keystore-password"

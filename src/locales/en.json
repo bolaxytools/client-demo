@@ -1,0 +1,22 @@
+{
+  "versionTitle": "Bolaxy Client Demo",
+  "hostTitle": "Node Service Host",
+  "keyStoreTitle": "Import Keystore",
+  "accountTitle": "Account List",
+  "transferTitle": "Send BUSD",
+  "recordTitle": "Last 20 transactions",
+  "hostNotice": "Please modify to your node service address before use",
+  "hostTip": "Caution",
+  "importButton": "Import",
+  "newButton": "New",
+  "accountOpt": "Options",
+  "optSend": "Send",
+  "optSendTo": "SendTo",
+  "optRemove": "Delete",
+  "inputFrom": "Account Send From",
+  "inputTo": "Account Send To",
+  "inputBalance": "Balance of BUSD",
+  "inputValue": "Send Amount",
+  "keyStoreText": "Keystore JSON File",
+  "keyStorePass": "Keystore password for decrypt"
+}

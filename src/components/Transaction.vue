@@ -2,20 +2,20 @@
   <div class="card-deck mt-4 mb-3">
     <div class="card shadow-sm">
       <div class="card-header">
-        发送BUSD
+        {{ $t('transferTitle') }}
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-5">
             <div class="form-group">
-              <label>发送账户</label>
+              <label>{{$t('inputFrom')}}</label>
               <b-input
                 readonly
                 :value="from"
               />
             </div>
             <div class="form-group">
-              <label>BUSD余额</label>
+              <label>{{ $t('inputBalance') }}</label>
               <b-input
                 readonly
                 :value="balance"
@@ -26,11 +26,11 @@
           </div>
           <div class="col-6">
             <div class="form-group">
-              <label>发送给</label>
+              <label>{{$t('inputTo')}}</label>
               <b-input v-model="target" />
             </div>
             <div class="form-group">
-              <label>发送数额</label>
+              <label>{{$t('inputValue')}}</label>
               <b-input
                 v-model="value"
                 aria-describedby="amountHelp"

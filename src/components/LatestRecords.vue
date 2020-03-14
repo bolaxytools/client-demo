@@ -2,7 +2,7 @@
   <div class="card-deck mt-4 mb-5">
     <div class="card shadow-sm">
       <div class="card-header">
-        最近20条交易记录
+        {{ $t('recordTitle') }}
       </div>
       <div
         id="txlist"

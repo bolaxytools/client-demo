@@ -1,8 +1,16 @@
 <template>
   <div class="card-deck mb-4">
     <div class="card shadow-sm">
-      <div class="card-header">
-        节点服务地址
+      <div class="card-header d-flex justify-content-between align-items-center">
+        {{ $t('hostTitle') }}
+        <b-dropdown
+          size="sm"
+          text="Language"
+          dropleft
+        >
+          <b-dropdown-item-button @click="language(1)">中文</b-dropdown-item-button>
+          <b-dropdown-item-button @click="language(2)">English</b-dropdown-item-button>
+        </b-dropdown>
       </div>
       <div class="card-body">
         <div class="form-group">
@@ -12,7 +20,7 @@
             :placeholder="placeholder"
           ></b-form-input>
           <small class="form-text text-muted pt-1">
-            <span class="badge badge-warning mr-2">注意</span>使用前请修改为你的节点服务地址
+            <span class="badge badge-warning mr-2">{{ $t('hostTip')}}</span>{{$t('hostNotice')}}
           </small>
         </div>
       </div>
@@ -33,6 +41,9 @@ export default {
   methods: {
     notify (value) {
       this.$store.dispatch('data/setHostAsync', value)
+    },
+    language (flag) {
+      flag === 2 ? this.$i18n.locale = 'en' : this.$i18n.locale = 'zh-cn'
     }
   }
 }
